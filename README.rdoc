@@ -1,0 +1,126 @@
+			Basic AJAX in Ruby on Rails(full crud with model)
+			--------------------------------------------------
+step1:- Add bootstrap-sass in gem file and setup the assest foldler(For model view)
+step2:- Add the following at the top of the controller 
+		respond_to :html, :js
+step3:- In index.html.erb file should like this
+		<div class="container">
+		  <div class="well">
+		    <%= link_to "New Product", new_product_path, remote: true, class: "btn btn-primary" %>
+		  </div>
+		  <div class="new-product"></div>
+		  
+		  <table class="table table-bordered table-striped">
+		    <thead>
+		      <tr>
+		        <th>Name</th>
+		        <th>Price</th>
+		        <td>&nbsp;</td>
+		        <td>&nbsp;</td>
+		      </tr>
+		    </thead>
+		    <tbody class="product-index">
+		      <%= render "index" %>
+		    </tbody>
+		  </table>
+		 </div>
+		<div id="product-modal" class="modal hide fade"></div>
+
+		_index.html.erb file look like this
+
+		<% @products.each do |product| %>
+		  <tr>
+		    <td><%= product.name %></td>
+		    <td><%= number_to_currency product.price %></td>
+		    <td><%= link_to "Edit", edit_product_path(product), remote: true, class: "btn" %></td>
+		    <td><%= link_to "Delete", product_delete_path(product), remote: true, class: "btn btn-danger" %></td>
+		  </tr>
+		<% end %>
+
+		_form.html.erb
+
+		<%= form_for @product, remote: true, html: { class: "form-horizontal", style: "display:inline;" } do |f| %>
+		  <div class="modal-body">
+		    <ul class="errors"></ul>
+
+		    <div class="control-group">
+		      <%= f.label :name, class:"control-label" %>
+		      <div class="controls">
+		        <%= f.text_field :name %>
+		      </div>
+		    </div>
+		    <div class="control-group">
+		      <%= f.label :price, class: "control-label" %>
+		      <div class="controls">
+		        <%= f.text_field :price %>
+		      </div>
+		    </div>
+		  </div>
+		  <div class="modal-footer">
+		    <%= f.submit class: "btn btn-primary" %>
+		    <%= link_to "Cancel", "#", class: "btn", data: {dismiss: "modal"} %>
+		  </div>
+		<% end %>
+
+		_new.html.erb
+
+		<div class="modal-header">
+		<h3>New Product</h3>
+		</div>
+		<%= render "form" %>
+
+		_edit.html.erb
+
+		<div class="modal-header">
+		  <h3><%= "Editing #{@product.name}" %></h3>
+		</div>
+		<%= render "form" %>
+
+		new.js.erb:
+
+		$("#product-modal").html("<%= escape_javascript(render 'new') %>")
+		$("#product-modal").modal("show")
+
+		edit.js.erb:
+
+		$("#product-modal").html("<%= escape_javascript(render 'edit') %>")
+		$("#product-modal").modal("show")
+
+		_save.js.erb:
+
+		$("ul.errors").html("")
+		<% if @product.errors.any? %>
+		  <% @product.errors.full_messages.each do |message| %>
+		    $("ul.errors").append($("<li />").html("<%= message.html_safe %>"))
+		  <% end %>
+		<% else %>
+		  $(".product-index").html("<%= escape_javascript(render 'index') %>")
+		  $("#product-modal").modal("hide")
+		<% end %>
+
+		create.js.erb and update.js.erb
+
+		<%= render "save" %>
+
+		_delete.html.erb:
+
+		<div class="modal-header">
+		  <h3>Delete Product</h3>
+		</div>
+		<div class="modal-body">
+		<ul class="errors"></ul>
+		Are you sure you wish to delete <b><%= @product.name %></b>?
+		</div>
+		<div class="modal-footer">
+		  <%= link_to "Yes, Delete This Product", product_path(@product), method: :delete, remote: true, class: "btn btn-danger" %>
+		  <%= link_to "No, Please Don't", "#", class: "btn", data: { dismiss: "modal" } %>
+		</div>
+
+		delete.js.erb:
+
+		$("#product-modal").html("<%= escape_javascript(render 'delete') %>")
+		$("#product-modal").modal("show")
+
+		destroy.js.erb:
+
+		<%= render "save" %>
